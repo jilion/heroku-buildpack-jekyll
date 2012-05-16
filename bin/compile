@@ -1,25 +1,9 @@
-#!/bin/sh
+#!/usr/bin/env ruby
 
-indent() {
-  sed -u 's/^/       /'
-}
+$:.unshift File.expand_path("../../lib", __FILE__)
+require "jekyll_pack"
 
-echo "-----> Compiling Jekyll site"
-
-# Install Jekyll into hidden directory in app roote
-
-cat << EOF > ~/.gemrc
-gemhome: $1/.gems
-gempath:
-- $1/.gems
-EOF
-
-/usr/local/bin/gem install bundler --no-rdoc --no-ri | indent
-/usr/local/bin/bundle install | indent
-
-# Run Jekyll
-echo "Running Jekyll" | indent
-export GEM_HOME=$1/.gems
-export PATH=$1/.gems/bin:$PATH
-cd $1
-$1/.gems/bin/rake compile | indent
+pack = JekyllPack.new
+pack.log("compile") do
+  pack.compile
+end
