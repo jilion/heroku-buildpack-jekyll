@@ -14,11 +14,11 @@ gempath:
 - $1/.gems
 EOF
 
-message "Installing jekyll version 0.11.2"
-/usr/local/bin/gem install jekyll -v 0.11.2 --no-rdoc --no-ri | indent
+message "Installing jekyll version 1.0.2"
+/usr/local/bin/gem install jekyll -v 1.0.2 --no-rdoc --no-ri | indent
 
-message "Installing Liquid version 2.2.2"
-/usr/local/bin/gem install liquid -v 2.2.2 --no-rdoc --no-ri | indent
+message "Installing RedCloth version 4.2.9"
+/usr/local/bin/gem install RedCloth -v 4.2.9 --no-rdoc --no-ri | indent
 
 # Run Jekyll
 message "Setting environment variables"
@@ -27,4 +27,11 @@ export PATH=$1/.gems/bin:$PATH
 export LC_ALL=en_US.UTF8
 cd $1
 message "Compiling Jekyll site"
-$1/.gems/bin/jekyll --no-auto --no-server --no-lsi --safe | indent
+
+publish_future_articles=""
+if [ "$PUBLISH_FUTURE_ARTICLES" == "$url" ]; then
+  message "Publish posts with a future date."
+  publish_future_articles="--future"
+fi
+
+$1/.gems/bin/jekyll --no-auto --no-server --no-lsi --safe "$publish_future_articles" | indent
