@@ -1,7 +1,8 @@
-#!/usr/bin/env ruby
+#!/bin/sh
 
-$:.unshift File.expand_path("../../lib", __FILE__)
-require "jekyll_pack"
+indent() {
+  sed -u 's/^/       /'
+}
 
 message() {
   echo "-----> $*"
@@ -29,7 +30,7 @@ cd $1
 message "Compiling Jekyll site"
 
 publish_future_articles=""
-if [ "$PUBLISH_FUTURE_ARTICLES" == "$url" ]; then
+if [ "$PUBLISH_FUTURE_ARTICLES" == "true" ]; then
   message "Publish posts with a future date."
   publish_future_articles="--future"
 fi
