@@ -35,4 +35,4 @@ if [ "$PUBLISH_FUTURE_ARTICLES" == "true" ]; then
   publish_future_articles="--future"
 fi
 
-$1/.gems/bin/jekyll --no-auto --no-server --no-lsi --safe "$publish_future_articles" | indent
+$1/.gems/bin/jekyll build --no-lsi --safe "$publish_future_articles" | indent
