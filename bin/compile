@@ -29,10 +29,10 @@ export LC_ALL=en_US.UTF8
 cd $1
 message "Compiling Jekyll site"
 
-publish_future_articles=""
+args="--safe"
 if [ "$PUBLISH_FUTURE_ARTICLES" == "true" ]; then
   message "Publish posts with a future date."
-  publish_future_articles="--future"
+  args="--safe --future"
 fi
 
-$1/.gems/bin/jekyll build --no-lsi --safe "$publish_future_articles" | indent
+$1/.gems/bin/jekyll build "$args" | indent
