@@ -1,38 +1,64 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
-indent() {
-  sed -u 's/^/       /'
+set -e
+
+BUILD_DIR=$1
+CACHE_DIR=$2
+
+# Install gems into BUILD_DIR/.gems
+cat << EOF > ~/.gemrc
+gemhome: $CACHE_DIR/.gems
+gempath:
+- $CACHE_DIR/.gems
+EOF
+
+function indent() {
+  c='s/^/       /'
+  case $(uname) in
+    Darwin) sed -l "$c";;
+    *)      sed -u "$c";;
+  esac
 }
 
-message() {
+function message() {
   echo "-----> $*"
 }
 
-# Install Jekyll into APP_ROOT/.gems
-cat << EOF > ~/.gemrc
-gemhome: $1/.gems
-gempath:
-- $1/.gems
-EOF
+function gem_version_from_gemfile_lock() {
+  action='sub(/\)/, "", $2); print $2'
+  awk -F\( "/ +$1 \([[:digit:]]\.[[:digit:]]\.[[:digit:]]\)/ { $action }" Gemfile.lock
+}
 
-message "Installing jekyll version 1.0.2"
-/usr/local/bin/gem install jekyll -v 1.0.2 --no-rdoc --no-ri | indent
+function install_gem() {
+  mkdir -p $CACHE_DIR
+  if ! [ -e $CACHE_DIR/$1 ]; then
+    message "Installing the $1 $(gem_version_from_gemfile_lock $1) gem..."
+    /usr/local/bin/gem install $1 -v $(gem_version_from_gemfile_lock $1) --no-rdoc --no-ri | indent
+  else
+    message "The $1 $(gem_version_from_gemfile_lock $1) gem is cached, skipping install!"
+  fi
+}
 
-message "Installing RedCloth version 4.2.9"
-/usr/local/bin/gem install RedCloth -v 4.2.9 --no-rdoc --no-ri | indent
+function jekyll_build_args() {
+  args='--safe'
+  if [ "$PUBLISH_FUTURE_ARTICLES" == "true" ]; then
+    message "Publish posts with a future date."
+    args="$args --future"
+  fi
+  echo $args
+}
+
+for gem in 'jekyll' 'RedCloth'
+do
+  install_gem $gem
+done
 
 # Run Jekyll
-message "Setting environment variables"
-export GEM_HOME=$1/.gems
-export PATH=$1/.gems/bin:$PATH
-export LC_ALL=en_US.UTF8
-cd $1
-message "Compiling Jekyll site"
+# message "Setting environment variables"
+# export GEM_HOME=$1/.gems
+# export PATH=$1/.gems/bin:$PATH
+# export LC_ALL=en_US.UTF8
+message 'Compiling Jekyll site...'
 
-args="--safe"
-if [ "$PUBLISH_FUTURE_ARTICLES" == "true" ]; then
-  message "Publish posts with a future date."
-  args="--safe --future"
-fi
-
-$1/.gems/bin/jekyll build "$args" | indent
+cd $BUILD_DIR
+$BUILD_DIR/.gems/bin/jekyll build $(jekyll_build_args) | indent
