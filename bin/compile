@@ -29,6 +29,8 @@ gempath:
 - $CACHE_DIR/.gems
 EOF
 
+message "RACK_ENV: $RACK_ENV"
+env
 message "Setting environment variables"
 export GEM_HOME=$CACHE_DIR/.gems
 export PATH=$CACHE_DIR/.gems/bin:$PATH
