@@ -29,7 +29,7 @@ EOF
 
 message "Setting environment variables"
 export GEM_HOME=$CACHE_DIR/.gems
-export PATH=$BUILD_DIR/.gems/bin:$PATH
+export PATH=$CACHE_DIR/.gems/bin:$PATH
 export LC_ALL=en_US.UTF8
 
 function gem_version_from_gemfile_lock() {
