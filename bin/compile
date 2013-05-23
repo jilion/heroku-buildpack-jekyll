@@ -52,10 +52,10 @@ function install_gem() {
 }
 
 function jekyll_build_args() {
-  args='--safe'
-  if [ "$PUBLISH_FUTURE_ARTICLES" == "true" ]; then
-    message "Publish posts with a future date."
-    args="$args --future"
+  args=''
+  if [ "$PUBLISH_DRAFT_ARTICLES" == "true" ]; then
+    message "Publish draft posts."
+    args="$args --drafts"
   fi
   echo $args
 }
