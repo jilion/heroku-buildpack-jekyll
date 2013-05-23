@@ -1,14 +1,31 @@
-# Jekyll Build Pack
+# Heroku Jekyll Buildpack
 
-The Jekyll Build Pack will look for a file named `_config.yml` in the app root and
-run Jekyll to create and serve the site.
+The Jekyll Buildpack will look for a file named `_config.yml` in the app root
+and use Jekyll to generate the site.
+
+The buildpack uses the `Gemfile.lock` in your project to detect the `jekyll` and
+`RedCloth` versions to use.
 
 ## Usage
 
-Add this language pack to your `BUILDPACK_URL`.
+This buildpack should be used in coordination with the Ruby buildpack using
+[`heroku-buildpack-multi`](https://github.com/ddollar/heroku-buildpack-multi).
+To serve your site, we recommend using
+[`rack-jekyll`](http://rubygems.org/gems/rack-jekyll).
 
-    heroku config:add BUILDPACK_URL="https://github.com/jilion/heroku-buildpack-jekyll.git"
+Add this language pack to your `BUILDPACK_URL`:
+```bash
+$ heroku config:add BUILDPACK_URL=https://github.com/ddollar/heroku-buildpack-multi.git
+```
 
-Or, with a recent version of the heroku gem, set it at creation time:
+or, set it at creation time:
+```bash
+$ heroku create --stack cedar --buildpack https://github.com/ddollar/heroku-buildpack-multi.git
+```
 
-    heroku create --stack cedar --buildpack https://github.com/jilion/heroku-buildpack-jekyll.git
+Don't forget to create a `.buildpacks` file at the root of your project:
+
+```bash
+https://github.com/jilion/heroku-buildpack-jekyll#production
+https://github.com/heroku/heroku-buildpack-ruby
+```
