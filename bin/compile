@@ -19,6 +19,7 @@ set -e
 
 BUILD_DIR=$1
 CACHE_DIR=$2
+mkdir -p $CACHE_DIR
 
 # Install gems into $CACHE_DIR/.gems
 cat << EOF > ~/.gemrc
@@ -41,32 +42,42 @@ function gem_version_from_gemfile_lock() {
 function install_gem() {
   gem=$1
   gem_version=$(gem_version_from_gemfile_lock $gem)
-  mkdir -p $CACHE_DIR
 
-  if ! [ -e $CACHE_DIR/.gems/gems/$gem-$gem_version ]; then
+  if [ $gem_version ]; then
     message "Installing the $gem $gem_version gem..."
-    gem install $gem -v $gem_version --no-rdoc --no-ri | indent
+    if ! [ -e $CACHE_DIR/.gems/gems/$gem-$gem_version ]; then
+      gem install $gem -v $gem_version --no-rdoc --no-ri | indent
+    else
+      message "The $gem $gem_version gem is cached, skipping install!"
+    fi
   else
-    message "The $gem $gem_version gem is cached, skipping install!"
+    message "The $gem gem is not present in the Gemfile.lock, skipping."
   fi
+}
+
+function jekyll_executable() {
+  exec='jekyll'
+  if [ $(which ejekyll) ]; then
+    exec='ejekyll'
+  fi
+  echo $exec
 }
 
 function jekyll_build_args() {
   args=''
   if [ "$PUBLISH_DRAFTS" == "true" ]; then
-    message "Publish draft posts."
     args="$args --drafts"
   fi
   echo $args
 }
 
-for gem in 'jekyll' 'RedCloth'
+for gem in 'jekyll' 'jekyll_ext' 'RedCloth'
 do
   install_gem $gem
 done
 
 # Run Jekyll
-message 'Compiling Jekyll site...'
+message "Compiling Jekyll site with args: $(jekyll_build_args)"
 
 cd $BUILD_DIR
-jekyll build $(jekyll_build_args) | indent
+$(jekyll_executable) build $(jekyll_build_args) | indent

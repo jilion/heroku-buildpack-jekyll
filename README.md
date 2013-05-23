@@ -3,8 +3,10 @@
 The Jekyll Buildpack will look for a file named `_config.yml` in the app root
 and use Jekyll to generate the site.
 
-The buildpack uses the `Gemfile.lock` in your project to detect the `jekyll` and
-`RedCloth` versions to use.
+The buildpack uses the `Gemfile.lock` in your project to detect the gems to
+install and their precise version. Currently, the buildpack tries to detect the
+`jekyll` (required), `jekyll_ext` (required if you're using extensions) and
+`RedCloth`.
 
 ## Usage
 
