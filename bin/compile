@@ -29,8 +29,8 @@ EOF
 
 message "Setting environment variables"
 export GEM_HOME=$CACHE_DIR/.gems
-# export PATH=$1/.gems/bin:$PATH
-# export LC_ALL=en_US.UTF8
+export PATH=$BUILD_DIR/.gems/bin:$PATH
+export LC_ALL=en_US.UTF8
 
 function gem_version_from_gemfile_lock() {
   gem=$1
@@ -45,7 +45,7 @@ function install_gem() {
 
   if ! [ -e $CACHE_DIR/.gems/gems/$gem-$gem_version ]; then
     message "Installing the $gem $gem_version gem..."
-    /usr/local/bin/gem install $gem -v $gem_version --no-rdoc --no-ri | indent
+    gem install $gem -v $gem_version --no-rdoc --no-ri | indent
   else
     message "The $gem $gem_version gem is cached, skipping install!"
   fi
@@ -69,4 +69,4 @@ done
 message 'Compiling Jekyll site...'
 
 cd $BUILD_DIR
-$CACHE_DIR/.gems/bin/jekyll build $(jekyll_build_args) | indent
+jekyll build $(jekyll_build_args) | indent
