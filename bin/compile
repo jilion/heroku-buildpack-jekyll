@@ -1,3 +1,76 @@
-#!/usr/bin/env ruby
+#!/usr/bin/env bash
 
-puts "RACK_ENV : #{ENV['RACK_ENV']}"
+# For testing the buildpack:
+#   https://github.com/heroku/buildkits#developing-buildpacks
+# For publishing the buildpack: https://github.com/heroku/heroku-buildpacks
+
+function indent() {
+  c='s/^/       /'
+  case $(uname) in
+    Darwin) sed -l "$c";;
+    *)      sed -u "$c";;
+  esac
+}
+
+function message() {
+  echo "-----> $*"
+}
+
+set -e
+
+BUILD_DIR=$1
+CACHE_DIR=$2
+mkdir -p $CACHE_DIR
+
+# Install gems into $CACHE_DIR/.gems
+cat << EOF > ~/.gemrc
+gemhome: $CACHE_DIR/.gems
+gempath:
+- $CACHE_DIR/.gems
+EOF
+
+message "Setting environment variables"
+export GEM_HOME=$CACHE_DIR/.gems
+export PATH=$CACHE_DIR/.gems/bin:$PATH
+export LC_ALL=en_US.UTF8
+
+function gem_version_from_gemfile_lock() {
+  gem=$1
+  action='sub(/\)/, "", $2); print $2'
+  awk -F\( "/ +$gem \([0-9]+\.[0-9]+\.[0-9]+\)/ { $action }" $BUILD_DIR/Gemfile.lock
+}
+
+function install_gem() {
+  gem=$1
+  gem_version=$(gem_version_from_gemfile_lock $gem)
+
+  if [ $gem_version ]; then
+    if ! [ -e $CACHE_DIR/.gems/gems/$gem-$gem_version ]; then
+      message "Installing the $gem $gem_version gem..."
+      gem install $gem -v $gem_version --no-rdoc --no-ri | indent
+    else
+      message "The $gem $gem_version gem is cached, skipping install!"
+    fi
+  else
+    message "The $gem gem is not present in the Gemfile.lock, skipping install."
+  fi
+}
+
+function jekyll_executable() {
+  exec='jekyll'
+  if [ $(which ejekyll) ]; then
+    exec='ejekyll'
+  fi
+  echo $exec
+}
+
+# for gem in 'jekyll' 'jekyll_ext' 'RedCloth'
+# do
+#   install_gem $gem
+# done
+
+# Run Jekyll
+message "Compiling Jekyll site..."
+
+cd $BUILD_DIR
+bundle exec $(jekyll_executable) build | indent
