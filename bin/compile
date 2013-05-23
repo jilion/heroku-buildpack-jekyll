@@ -29,7 +29,6 @@ gempath:
 - $CACHE_DIR/.gems
 EOF
 
-message "RACK_ENV: $RACK_ENV"
 message "Setting environment variables"
 export GEM_HOME=$CACHE_DIR/.gems
 export PATH=$CACHE_DIR/.gems/bin:$PATH
@@ -65,21 +64,13 @@ function jekyll_executable() {
   echo $exec
 }
 
-function jekyll_build_args() {
-  args=''
-  if [ $PUBLISH_DRAFTS -e "true" ]; then
-    args="$args --drafts"
-  fi
-  echo $args
-}
-
 for gem in 'jekyll' 'jekyll_ext' 'RedCloth'
 do
   install_gem $gem
 done
 
 # Run Jekyll
-message "Compiling Jekyll site with args: $(jekyll_build_args)"
+message "Compiling Jekyll site..."
 
 cd $BUILD_DIR
-$(jekyll_executable) build $(jekyll_build_args) | indent
+$(jekyll_executable) build | indent
