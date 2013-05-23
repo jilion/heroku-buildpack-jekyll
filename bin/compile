@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
-# For testing the buildpack: https://github.com/heroku/buildkits#developing-buildpacks
+# For testing the buildpack:
+#   https://github.com/heroku/buildkits#developing-buildpacks
 # For publishing the buildpack: https://github.com/heroku/heroku-buildpacks
 
 function indent() {
@@ -28,6 +29,7 @@ gempath:
 - $CACHE_DIR/.gems
 EOF
 
+message "RACK_ENV: $RACK_ENV"
 message "Setting environment variables"
 export GEM_HOME=$CACHE_DIR/.gems
 export PATH=$CACHE_DIR/.gems/bin:$PATH
@@ -44,14 +46,14 @@ function install_gem() {
   gem_version=$(gem_version_from_gemfile_lock $gem)
 
   if [ $gem_version ]; then
-    message "Installing the $gem $gem_version gem..."
     if ! [ -e $CACHE_DIR/.gems/gems/$gem-$gem_version ]; then
+      message "Installing the $gem $gem_version gem..."
       gem install $gem -v $gem_version --no-rdoc --no-ri | indent
     else
       message "The $gem $gem_version gem is cached, skipping install!"
     fi
   else
-    message "The $gem gem is not present in the Gemfile.lock, skipping."
+    message "The $gem gem is not present in the Gemfile.lock, skipping install."
   fi
 }
 
@@ -65,7 +67,7 @@ function jekyll_executable() {
 
 function jekyll_build_args() {
   args=''
-  if [ "$PUBLISH_DRAFTS" == "true" ]; then
+  if [ $PUBLISH_DRAFTS -e "true" ]; then
     args="$args --drafts"
   fi
   echo $args
